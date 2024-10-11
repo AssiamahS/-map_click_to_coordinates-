@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Map Click Coordinates</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <style>
+        #map {
+            height: 600px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Click on the Map to Get Coordinates</h1>
+    <div id="map"></div>
+    <script>
+        var map = L.map('map').setView([39.8283, -98.5795], 4); // Centered on the USA
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        map.on('click', function(e) {
+            var lat = e.latlng.lat;
+            var lon = e.latlng.lng;
+            fetch('/coordinates', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ latitude: lat, longitude: lon })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Coordinates:', data);
+            });
+        });
+
+        // Function for generating a snake-like pattern of coordinates from LA to NY
+        function generateSnakePattern() {
+            // Example: Start at LA (34.0522, -118.2437) and end at NY (40.7128, -74.0060)
+            var coordinates = [
+                [34.0522, -118.2437], // LA
+                // Add more coordinates to create a snake-like pattern
+                [39.0997, -94.5786],  // Kansas City
+                [41.8781, -87.6298],  // Chicago
+                [40.7128, -74.0060]   // NY
+            ];
+            for (var i = 0; i < coordinates.length; i++) {
+                var latlng = coordinates[i];
+                L.marker(latlng).addTo(map);
+                console.log('Generated Coordinate:', latlng);
+            }
+        }
+
+        generateSnakePattern();
+    </script>
+</body>
+</html>
